@@ -403,7 +403,7 @@ export function drawLabeler(plottingApp) {
     .attr("class", "point")
     .attr("cx", function(d) { return plottingApp.main_xscale(d.time); })
     .attr("cy", function(d) { return selectYScale(d); })
-    .attr("r", 5);
+    .attr("r", 2);
 
     // add secondary line and update secondary point styling if there is reference
     if (secondary_data) {
@@ -852,12 +852,29 @@ export function drawLabeler(plottingApp) {
     var code = d3.event.keyCode;
     if (code == 38) {
       // handle up arrowkey
-      transformContext(0, -2);
-      d3.event.preventDefault();
-    } else if (code == 40) {
+      if(plottingApp.shiftKey){
+        var minmax=plottingApp.axisBounds[plottingApp.selectedSeries];
+        plottingApp.axisBounds[plottingApp.selectedSeries]=[minmax[0]/1.1,minmax[1]/1.1];
+        replot();
+        d3.event.preventDefault();
+      } else {
+        transformContext(0, -2);
+        d3.event.preventDefault();
+        } 
+      }
+      else if (code == 40) {
       // handle down arrowkey
-      transformContext(0, 2);
-      d3.event.preventDefault();
+      if(plottingApp.shiftKey){
+        var minmax=plottingApp.axisBounds[plottingApp.selectedSeries];
+        plottingApp.axisBounds[plottingApp.selectedSeries]=[minmax[0]*1.1,minmax[1]*1.1];
+        replot();
+        d3.event.preventDefault();
+
+      } else {
+        transformContext(0, 2);
+        d3.event.preventDefault();
+      }
+      
     } else if (code === 37) {
       // handle left arrowkey
       if (plottingApp.shiftKey) {
