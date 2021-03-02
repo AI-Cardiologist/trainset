@@ -8,6 +8,9 @@
         <li class="nav-item">
           <div class="nav-link" id="clear" @click="modalHandler().openClear()">Clear</div>
         </li>
+        <template v-if="!hasUserFile">
+          <div class="nav-link" id="overwrite" @click="modalHandler().openOverwrite()">Overwrite</div>
+        </template>
         <div class="nav-link" id="export" @click="modalHandler().openExport()">Export</div>
       </ul>
     </template>
@@ -38,7 +41,9 @@
               <strong>How to Navigate the Graph</strong></br>
               <kbd>→</kbd> or <kbd>←</kbd> : pan</br>
               <kbd>SHIFT</kbd> + <kbd>→</kbd> or <kbd>←</kbd> : fast pan</br>
-              <kbd>↑</kbd> or <kbd>↓</kbd>: zoom</br>
+              <kbd>↑</kbd> or <kbd>↓</kbd>: horizontal zoom</br>
+              <kbd>SHIFT</kbd> + <kbd>↑</kbd> or <kbd>↓</kbd>: vertical zoom</br>
+              <kbd>CTRL</kbd> + <kbd>↑</kbd> or <kbd>↓</kbd>: vertical pan</br>
               <strong>Click & Drag</strong> the bottom context bar to adjust focus region</br>
             </div>
           </div>
@@ -96,6 +101,9 @@
           <template v-else-if="modal.name == 'export'">
             Upload new data set or continue labeling this one?
           </template>
+          <template v-else-if="modal.name == 'overwrite'">
+            Continue labeling this one or truly overwrite?
+          </template>
           <template v-else-if="modal.name == 'delete'">
             Are you sure you want to delete label: {{ selectedLabel }}
           </template>
@@ -138,7 +146,8 @@ export default {
     headerStr: String,
     seriesList: Array,
     labelList: Array,
-    isValid: Boolean
+    isValid: Boolean,
+    userFile: Boolean
   },
   data: function() {
     return {
@@ -165,6 +174,7 @@ export default {
       plottingApp.csvData = this.csvData;
       plottingApp.seriesList = this.seriesList;
       plottingApp.labelList = this.labelList.sort();
+      plottingApp.userFile = this.userFile;
       $("#maindiv").append("<div class=\"loader\"></div>");
 
       // populate selectors
@@ -188,7 +198,10 @@ export default {
   computed: {
     // determines if delete button should be visible
     deleteValid: function() {
-      return !(this.optionsList.length == 1)
+      return !(this.optionsList.length == 1);
+    },
+    hasUserFile: function(){
+      return this.userFile;
     }
   },
   methods: {
@@ -235,6 +248,11 @@ export default {
           self.modal.header = "Edit Axis Bounds";
           self.$refs.modalComponent.show();
         },
+        openOverwrite: function() {
+          self.modal.name = "overwrite";
+          self.modal.header = "Overwrite??";
+          self.$refs.modalComponent.show();
+        },        
         openExport: function() {
           self.modal.name = "export";
           self.modal.header = "Export complete";
@@ -360,6 +378,40 @@ export default {
         this.routeHandler().newUpload();
       } else if (modal_name == "upload_failed") {
         this.routeHandler().goHome();
+      } else if (modal_name == "overwrite"){
+        var csvContent = plottingApp.headerStr + "\n";
+        plottingApp.allData.forEach(function(dataArray){
+          var date = dataArray.actual_time.toISO();
+          let row = dataArray.series + "," + date
+                + "," + dataArray.val + "," + dataArray.label;
+          csvContent += row + "\n";
+        });
+        var saveData = (function () {
+          return function (data, fileName) {
+              var axiosBase = require("axios");
+              const axios = axiosBase.create({
+                baseURL: "http://localhost:5000/",
+                headers: {
+                  "Content-type": "application/json",
+                },
+              });
+              const csvStr = data;
+              const csv=require('csvtojson')
+              csv()
+              .fromString(csvStr)
+              .then((jsonObj)=>{
+                var jsonObj_fname = {};
+                jsonObj_fname["data"] = jsonObj;
+                jsonObj_fname["filename"] = fileName;
+                axios.post("/post",jsonObj_fname)
+                  .then(function (response) {
+                    console.log(response.data);
+                  });
+                });
+            };
+          }());
+        var filename = plottingApp.filename;
+        saveData(csvContent, filename + ".csv");
       } else if (modal_name == "delete") {
         this.removeLabel();
       } else if (modal_name == "edit") {

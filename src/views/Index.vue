@@ -3,7 +3,7 @@
     <template v-slot:main-content>
       <div>
         <h3 class="title">Welcome to TRAINSET</h3>
-        <button type="button" class="btn btn-lg btn-outline-danger upload" id="load1" @click="fileCheck('/static/files/sample_trainset.csv')">SampleData1</button>
+        <button type="button" class="btn btn-lg btn-outline-danger upload" id="load1" @click="fileCheck('/dynamic/files/sample_trainset.csv')">SampleData1</button>
         <button type="button" class="btn btn-lg btn-outline-danger upload" id="upload" @click="upload">Upload Data</button>
         <input type="file" id="upload-file" ref="fileInput" class="fileCheck" @change="fileCheck('')">
         <!--<a id="sampleCSV" href="/static/files/sample_trainset.csv" download>sample CSV</a>-->
@@ -71,6 +71,7 @@ export default {
       var reader = new FileReader();
       var seriesList = new Set(), labelList = new Set(), plotDict = [], headerStr;
       var fileText = "";
+      var userFile = false;
 
       if (filename!="")
       {
@@ -81,12 +82,15 @@ export default {
         var arrayBuffer = xhr.response;
         var blob =  new Blob([arrayBuffer], {type: "application/vnd.ms-excel"});
         reader.readAsBinaryString(blob);
+        filename = filename.split('.csv')[0];
+        userFile = false;
       }
       else
       {
         var fileInput = document.getElementById("upload-file").files.item(0), fileText;
         filename = fileInput.name.split('.csv')[0];
         reader.readAsBinaryString(fileInput);
+        userFile = true;
       }
 
       reader.onloadend = () => {
@@ -139,7 +143,8 @@ export default {
               headerStr: headerStr,
               seriesList: seriesList,
               labelList: labelList,
-              isValid: true
+              isValid: true,
+              userFile: userFile
             }
           });
         }

@@ -9,11 +9,13 @@
       </div>
       <div class="modalBtnContainer">
         <button type="button" class="btn btn-light modalBtn dualBtn" id="leftBtn" :class="computedColor.button" v-if="!isFailed" @click="hide()">
-          <template v-if="!isExport">Cancel</template>
+          <template v-if="isOverwrite">Continue</template>
+          <template v-else-if="!isExport">Cancel</template>
           <template v-else-if="isExport">Continue</template>
         </button>
         <button type="button" class="btn btn-light modalBtn" id="rightBtn" :class="[computedColor.button, isFailed ? singleBtn : dualBtn]" @click="postOk()">
-          <template v-if="!isExport">Ok</template>
+          <template v-if="isOverwrite">Overwrite</template>
+          <template v-else-if="!isExport">Ok</template>
           <template v-else-if="isExport">Upload</template>
         </button>
       </div>
@@ -36,6 +38,12 @@ export default {
         "button": "exportButton",
         "modalBox": "exportBox"
       },
+      overwriteColor: {
+        "header" : "overwriteHeader",
+        "content": "overwriteContent",
+        "button": "overwriteButton",
+        "modalBox": "overwriteBox"
+      },      
       defaultColor: {
         "header" : "defaultHeader",
         "content": "defaultContent",
@@ -68,11 +76,25 @@ export default {
     isFailed: function() {
       return this.modalName.includes("failed");
     },
+    isOverwrite: function(){
+      return this.modalName == "overwrite";
+
+    },
     isExport: function() {
       return this.modalName == "export";
     },
     computedColor: function() {
-      return this.modalName == "export" ? this.exportColor : this.defaultColor;
+      if(this.modalName == "export")
+      {
+        return this.exportColor;
+      }
+      else if (this.modalName == "overwrite")
+      {
+        return this.overwriteColor;
+      }
+      else{
+        return this.defaultColor;
+      }
     }
   }
 };
@@ -101,6 +123,33 @@ export default {
 #modal >>> .exportBox {
   border-radius: 10px;
   border: 3px solid #7E4C64;
+  position: fixed;
+  top: 30%;
+  left: 42%;
+}
+
+.overwriteHeader {
+  background-color: #eb5b34;
+}
+
+.overwriteContent {
+  color: #eb5b34;
+}
+
+.overwriteButton {
+  color: #eb5b34;
+  border-color: #eb5b34;
+}
+
+.overwriteButton:hover {
+  color: #F4F4F4;
+  border-color: #eb5b34;
+  background-color: #eb5b34;
+}
+
+#modal >>> .overwriteBox {
+  border-radius: 10px;
+  border: 3px solid #eb5b34;
   position: fixed;
   top: 30%;
   left: 42%;

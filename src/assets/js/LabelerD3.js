@@ -825,7 +825,7 @@ export function drawLabeler(plottingApp) {
         document.body.appendChild(a);
         a.style = "display: none";
         return function (data, fileName) {
-            var string = csvContent,
+            var string = data,
                 blob = new Blob([string], {type: "text/csv, charset=UTF-8"}),
                 url = window.URL.createObjectURL(blob);
             a.href = url;
@@ -842,6 +842,12 @@ export function drawLabeler(plottingApp) {
     $("#exportComplete").show();
   });
 
+  $("#overwrite").click(function() {
+    
+  });
+
+
+
   d3.select(window).on("keydown", function(e) {
     plottingApp.shiftKey = d3.event.shiftKey;
     if (plottingApp.shiftKey) {
@@ -849,12 +855,27 @@ export function drawLabeler(plottingApp) {
     } else {
       plottingApp.shiftKey = false;
     }
+
+    plottingApp.ctrlKey = d3.event.ctrlKey;
+    if (plottingApp.ctrlKey) {
+      plottingApp.ctrlKey = true;
+    } else {
+      plottingApp.ctrlKey = false;
+    }
+
     var code = d3.event.keyCode;
     if (code == 38) {
       // handle up arrowkey
       if(plottingApp.shiftKey){
         var minmax=plottingApp.axisBounds[plottingApp.selectedSeries];
         plottingApp.axisBounds[plottingApp.selectedSeries]=[minmax[0]/1.1,minmax[1]/1.1];
+        replot();
+        d3.event.preventDefault();
+      } else if(plottingApp.ctrlKey)
+      {
+        var minmax=plottingApp.axisBounds[plottingApp.selectedSeries];
+        var shift=(minmax[1]-minmax[0])*0.05;
+        plottingApp.axisBounds[plottingApp.selectedSeries]=[minmax[0]-shift,minmax[1]-shift];
         replot();
         d3.event.preventDefault();
       } else {
@@ -870,6 +891,13 @@ export function drawLabeler(plottingApp) {
         replot();
         d3.event.preventDefault();
 
+      } else if(plottingApp.ctrlKey)
+      {
+        var minmax=plottingApp.axisBounds[plottingApp.selectedSeries];
+        var shift=(minmax[1]-minmax[0])*0.05;
+        plottingApp.axisBounds[plottingApp.selectedSeries]=[minmax[0]+shift,minmax[1]+shift];
+        replot();
+        d3.event.preventDefault();
       } else {
         transformContext(0, 2);
         d3.event.preventDefault();
@@ -907,5 +935,13 @@ export function drawLabeler(plottingApp) {
     } else {
       plottingApp.shiftKey = false;
     }
+
+    plottingApp.ctrlKey = d3.event.ctrlKey;
+    if (plottingApp.ctrlKey) {
+      plottingApp.ctrlKey = true;
+    } else {
+      plottingApp.ctrlKey = false;
+    }
+    
   });
 }

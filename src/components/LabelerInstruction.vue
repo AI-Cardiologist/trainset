@@ -11,7 +11,9 @@
         <strong>How to Navigate the Graph</strong></br>
         <kbd>→</kbd> or <kbd>←</kbd> : pan</br>
         <kbd>SHIFT</kbd> + <kbd>→</kbd> or <kbd>←</kbd> : fast pan</br>
-        <kbd>↑</kbd> or <kbd>↓</kbd>: zoom</br>
+        <kbd>↑</kbd> or <kbd>↓</kbd>: horizontal zoom</br>
+        <kbd>SHIFT</kbd> + <kbd>↑</kbd> or <kbd>↓</kbd>: vertical zoom</br>
+        <kbd>CTRL</kbd> + <kbd>↑</kbd> or <kbd>↓</kbd>: vertical pan</br>
         <strong>Click & Drag</strong> the bottom context bar to adjust focus region</br>
       </div>
     </div>
